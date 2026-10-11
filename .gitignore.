@@ -1,0 +1,24 @@
+# Node.js
+node_modules/
+npm-debug.log*
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Generated geospatial data
+data/raw/
+data/processed/
+*.tif
+*.tiff
+
+# Editor and operating system
+.vscode/
+.DS_Store
+Thumbs.db
