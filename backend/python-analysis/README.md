@@ -46,3 +46,47 @@ These commands have not yet been verified in the project environment.
 ## Integration Status
 
 This module is under development. Integration with the flood-detection outputs and the backend API, as well as local execution and testing, are still required.
+
+## Connectivity JSON Loader
+
+`graph_loader.py` loads and validates the connectivity inputs:
+
+- `road_graph.json` — road-network nodes and edges.
+- `settlement_nodes.json` — settlement IDs mapped to graph nodes.
+- `destination_nodes.json` — hospital or shelter IDs mapped to graph nodes.
+
+The `connectivity.py` function `analyze_connectivity_from_files()`
+loads these inputs, validates the node mappings, and calculates
+settlement reachability using NetworkX.
+
+Example usage:
+
+```python
+from connectivity import analyze_connectivity_from_files
+
+results = analyze_connectivity_from_files(
+    "backend/data/inputs/road_graph.json",
+    "backend/data/inputs/settlement_nodes.json",
+    "backend/data/inputs/destination_nodes.json",
+)
+
+print(results)
+```
+
+The example assumes the files exist at the supplied paths. The input
+datasets have not yet been confirmed available.
+
+Invalid JSON, missing files, and mappings to nonexistent graph nodes
+raise errors. The calling pipeline must handle those errors and report
+the input as invalid or unavailable.
+
+These results describe connectivity in the supplied graph only.
+Flood-related road closures must be incorporated before interpreting
+the results as post-event accessibility.
+
+## Testing Status
+
+Unit and integration test cases have been added, but they have not yet
+been executed. Local test execution and integration testing with
+representative datasets remain pending.
+```
