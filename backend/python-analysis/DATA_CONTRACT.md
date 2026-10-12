@@ -161,15 +161,106 @@ Expected structure:
 
 Each destination must map to a node in the road graph.
 
-### Connectivity assumptions and limitations
 
-- Missing nodes or destinations must produce an `uncertain` result, not an
-  unsupported claim of isolation.
-- A reachable path means connected in the supplied graph; it does not
-  establish that a road is safe or passable in the real world.
-- The current analysis function accepts an in-memory NetworkX graph,
-  settlement mapping, and destination node IDs. A loader for these JSON
-  files still needs to be implemented.
-- Proposed filenames and formats require teammate agreement before API
-  integration.
+## Connectivity Input Files — v0.1.0
+
+The following JSON formats are the agreed provisional integration
+contract for connectivity analysis.
+
+Proposed directory:
+`backend/data/inputs/`
+
+### 1. road_graph.json
+
+Required structure:
+
+```json
+{
+  "nodes": [
+    {"id": "node-1"},
+    {"id": "node-2"},
+    {"id": "node-3"}
+  ],
+  "edges": [
+    {"source": "node-1", "target": "node-2"},
+    {"source": "node-2", "target": "node-3"}
+  ]
+}
+```
+
+Required fields:
+
+- `nodes`: array of graph nodes.
+- `nodes[].id`: non-empty string; unique within the graph.
+- `edges`: array of road-network edges.
+- `edges[].source`: ID of an existing node.
+- `edges[].target`: ID of an existing node.
+
+Rules:
+- Node IDs must be unique.
+- Every edge endpoint must reference an existing node.
+- Self-loops are not permitted in v0.1.0.
+- The graph is undirected.
+- Duplicate edges should be rejected or deduplicated during loading.
+- Optional road attributes, such as `road_id`, `road_type`, and `length_m`,
+  may be added later. They are not required by the current loader contract.
+
+### 2. settlement_nodes.json
+
+Required structure:
+
+```json
+{
+  "settlement-1": "node-1",
+  "settlement-2": "node-3"
+}
+```
+
+Required fields and rules:
+
+- Each object key is a non-empty settlement ID.
+- Each value is a non-empty road-graph node ID.
+- Settlement IDs must be unique JSON object keys.
+- Every mapped node should exist in `road_graph.json`.
+- If a settlement maps to a missing node, its result must be marked
+  `uncertain`, not `potentially_isolated`.
+
+### 3. destination_nodes.json
+
+Required structure:
+
+```json
+{
+  "destinations": [
+    {"id": "hospital-1", "node_id": "node-2"},
+    {"id": "shelter-1", "node_id": "node-3"}
+  ]
+}
+```
+
+Required fields and rules:
+
+- `destinations`: array of destination records.
+- `destinations[].id`: non-empty, unique destination ID.
+- `destinations[].node_id`: non-empty graph node ID.
+- Every destination node should exist in `road_graph.json`.
+- Missing destination nodes must be reported as uncertain or invalid input;
+  they must not silently produce a false isolation result.
+- An empty destination list must not be interpreted as proof of isolation.
+
+### Input validation and connectivity assumptions
+
+- All three files must be valid JSON with the structures described above.
+- Invalid JSON, missing required fields, duplicate IDs, or invalid edge
+  references must produce a clear validation error.
+- Missing input files must be reported as unavailable; do not fabricate
+  replacement datasets.
+- The initial graph is undirected and represents the supplied road network.
+- Reachability means connected in the supplied graph; it does not prove
+  that a road is safe or passable in the real world.
+- To assess post-event accessibility, potential road closures must be
+  applied to the graph before reachability is calculated.
+- These input files have not yet been supplied. Full analysis and integration
+  testing remain pending until representative datasets are available.
+
 
