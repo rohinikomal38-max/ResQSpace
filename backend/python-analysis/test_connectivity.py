@@ -1,9 +1,15 @@
 
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
 import networkx as nx
 
-from connectivity import analyze_connectivity
+from connectivity import (
+    analyze_connectivity,
+    analyze_connectivity_from_files,
+)
 
 
 class TestConnectivity(unittest.TestCase):
@@ -67,7 +73,63 @@ class TestConnectivity(unittest.TestCase):
         )
         self.assertIsNone(results["settlement-4"]["reachable"])
 
+    def test_connectivity_from_json_files(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            directory = Path(temp_dir)
+
+            graph_data = {
+                "nodes": [
+                    {"id": "A"},
+                    {"id": "B"},
+                    {"id": "C"},
+                ],
+                "edges": [
+                    {"source": "A", "target": "B"},
+                    {"source": "B", "target": "C"},
+                ],
+            }
+
+            settlement_data = {
+                "settlement-1": "A",
+                "settlement-2": "C",
+            }
+
+            destination_data = {
+                "destinations": [
+                    {"id": "hospital-1", "node_id": "C"}
+                ]
+            }
+
+            graph_path = directory / "road_graph.json"
+            settlement_path = directory / "settlement_nodes.json"
+            destination_path = directory / "destination_nodes.json"
+
+            graph_path.write_text(
+                json.dumps(graph_data),
+                encoding="utf-8",
+            )
+            settlement_path.write_text(
+                json.dumps(settlement_data),
+                encoding="utf-8",
+            )
+            destination_path.write_text(
+                json.dumps(destination_data),
+                encoding="utf-8",
+            )
+
+            results = analyze_connectivity_from_files(
+                graph_path,
+                settlement_path,
+                destination_path,
+            )
+
+            self.assertTrue(results["settlement-1"]["reachable"])
+            self.assertTrue(results["settlement-2"]["reachable"])
+            self.assertEqual(
+                results["settlement-1"]["reachable_destination_id"],
+                "C",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
- 
