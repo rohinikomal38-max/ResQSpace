@@ -1,18 +1,19 @@
+
 import json
-from datetime import datetime, timezone
+
+from output_schema import build_metadata
 
 
 def main():
-    status = {
-        "project": "ResQSpace",
-        "module": "infrastructure-connectivity",
-        "schema_version": "0.1.0",
-        "processing_status": "pending",
-        "message": "Python analysis pipeline initialized",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    }
+    result = build_metadata(
+        processing_status="pending",
+        uncertainty_notes=[
+            "Flood input has not been loaded yet.",
+            "Infrastructure and connectivity analysis has not run yet.",
+        ],
+    )
 
-    print(json.dumps(status, indent=2))
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":
