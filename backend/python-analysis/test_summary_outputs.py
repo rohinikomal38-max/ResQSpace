@@ -19,8 +19,8 @@ class TestSummaryOutputs(unittest.TestCase):
                 output_path=output,
                 total_assets=10,
                 exposure_counts={
-                    "exposed": 3,
-                    "not_exposed": 7,
+                    "potentially_affected": 3,
+                    "not_flagged": 7,
                 },
             )
 
@@ -28,7 +28,12 @@ class TestSummaryOutputs(unittest.TestCase):
                 data = json.load(file)
 
             self.assertEqual(data["total_assets"], 10)
-            self.assertEqual(data["exposure_counts"]["exposed"], 3)
+            self.assertEqual(
+                data["exposure_counts"]["potentially_affected"], 3
+            )
+            self.assertEqual(
+                data["exposure_counts"]["not_flagged"], 7
+            )
             self.assertEqual(data["schema_version"], "0.1.0")
 
     def test_connectivity_summary(self):
