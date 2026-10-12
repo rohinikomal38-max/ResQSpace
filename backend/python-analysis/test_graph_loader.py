@@ -151,6 +151,13 @@ class TestGraphLoader(unittest.TestCase):
             graph,
             {"settlement-1": "node-1"},
             {"hospital-1": "node-2"},
+            
+    def test_invalid_json_is_reported(self):
+        path = self.directory / "invalid.json"
+        path.write_text("{invalid json}", encoding="utf-8")
+
+        with self.assertRaisesRegex(ValueError, "Invalid JSON"):
+            load_road_graph(path)
         )
 
 
