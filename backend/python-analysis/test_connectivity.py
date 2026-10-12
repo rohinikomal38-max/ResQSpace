@@ -172,6 +172,47 @@ class TestConnectivity(unittest.TestCase):
                     settlement_path,
                     destination_path,
                 )
+                
+    def test_file_integration_with_no_destinations_is_uncertain(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            directory = Path(temp_dir)
+
+            graph_path = directory / "road_graph.json"
+            settlement_path = directory / "settlement_nodes.json"
+            destination_path = directory / "destination_nodes.json"
+
+            graph_path.write_text(
+                json.dumps({
+                    "nodes": [{"id": "A"}],
+                    "edges": [],
+                }),
+                encoding="utf-8",
+            )
+
+            settlement_path.write_text(
+                json.dumps({"settlement-1": "A"}),
+                encoding="utf-8",
+            )
+
+            destination_path.write_text(
+                json.dumps({"destinations": []}),
+                encoding="utf-8",
+            )
+
+            results = analyze_connectivity_from_files(
+                graph_path,
+                settlement_path,
+                destination_path,
+            )
+
+            self.assertEqual(
+                results["settlement-1"]["isolation_status"],
+                "uncertain",
+            )
+            self.assertIsNone(
+                results["settlement-1"]["reachable"]
+            )
+
 
 
 if __name__ == "__main__":
