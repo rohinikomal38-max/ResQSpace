@@ -1,18 +1,39 @@
 
 import json
+import os
+import tempfile
 from pathlib import Path
 
 from output_schema import build_metadata
 
 
 def write_json(output_path, data):
-    """Write a JSON object to a file."""
+    """Write JSON atomically by replacing the destination after writing."""
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    with path.open("w", encoding="utf-8") as file:
-        json.dump(data, file, indent=2, ensure_ascii=False)
-        file.write("\n")
+    temp_path = None
+
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as file:
+            temp_path = Path(file.name)
+            json.dump(data, file, indent=2, ensure_ascii=False)
+            file.write("\n")
+            file.flush()
+            os.fsync(file.fileno())
+
+        os.replace(temp_path, path)
+        temp_path = None
+    finally:
+        if temp_path is not None:
+            temp_path.unlink(missing_ok=True)
 
 
 def write_infrastructure_summary(
@@ -28,9 +49,8 @@ def write_infrastructure_summary(
         processing_status="completed",
         source=source,
         uncertainty_notes=[
-            "Potentially affected assets geometrically overlap "
-            "potential-change areas.",
-            "This overlap does not confirm flooding or infrastructure damage.",
+            "Potentially affected assets overlap potential-change areas.",
+            "Overlap does not confirm flooding or infrastructure damage.",
             "Results depend on input geometry quality and CRS information.",
         ],
     )
@@ -55,7 +75,7 @@ def write_connectivity_summary(
     event_id=None,
     source=None,
 ):
-    """Write settlement connectivity statistics."""
+    """Write estimated settlement connectivity statistics."""
     statuses = [
         result.get("isolation_status", "not_assessed")
         for result in settlement_results.values()
@@ -66,9 +86,9 @@ def write_connectivity_summary(
         processing_status="completed",
         source=source,
         uncertainty_notes=[
-            "Isolation is estimated using the supplied road graph.",
+            "Connectivity is estimated using the supplied road graph.",
             "Results depend on road-closure and destination assumptions.",
-            "Potential isolation is not a confirmed real-world service disruption.",
+            "Potential isolation is not a confirmed service disruption.",
         ],
     )
 
