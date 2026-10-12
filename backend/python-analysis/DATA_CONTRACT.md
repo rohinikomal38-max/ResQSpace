@@ -103,3 +103,73 @@ All GeoJSON outputs should use EPSG:4326. Summary JSON files must include `schem
 
 This contract is provisional until tested against representative input files and the Express API.
 
+## Connectivity Graph Input Format
+
+The connectivity module will use three JSON inputs. Proposed paths are
+provisional and must be confirmed with the API teammate.
+
+### 1. Road graph: `road_graph.json`
+
+Expected structure:
+
+```json
+{
+  "nodes": [
+    {"id": "node-1"},
+    {"id": "node-2"},
+    {"id": "node-3"}
+  ],
+  "edges": [
+    {"source": "node-1", "target": "node-2"},
+    {"source": "node-2", "target": "node-3"}
+  ]
+}
+```
+
+- Each node ID must be unique.
+- Each edge must reference existing node IDs.
+- The initial graph is undirected.
+- This graph represents the prepared road network. Road closures must be
+  applied to the graph before calculating post-event accessibility.
+
+### 2. Settlement mapping: `settlement_nodes.json`
+
+Expected structure:
+
+```json
+{
+  "settlement-1": "node-1",
+  "settlement-2": "node-3"
+}
+```
+
+Each key is a settlement ID and each value is its corresponding road-graph
+node ID.
+
+### 3. Destination nodes: `destination_nodes.json`
+
+Expected structure:
+
+```json
+{
+  "destinations": [
+    {"id": "hospital-1", "node_id": "node-2"},
+    {"id": "shelter-1", "node_id": "node-3"}
+  ]
+}
+```
+
+Each destination must map to a node in the road graph.
+
+### Connectivity assumptions and limitations
+
+- Missing nodes or destinations must produce an `uncertain` result, not an
+  unsupported claim of isolation.
+- A reachable path means connected in the supplied graph; it does not
+  establish that a road is safe or passable in the real world.
+- The current analysis function accepts an in-memory NetworkX graph,
+  settlement mapping, and destination node IDs. A loader for these JSON
+  files still needs to be implemented.
+- Proposed filenames and formats require teammate agreement before API
+  integration.
+
