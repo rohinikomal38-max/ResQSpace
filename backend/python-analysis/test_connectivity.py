@@ -54,6 +54,20 @@ class TestConnectivity(unittest.TestCase):
         )
         self.assertIsNone(results["settlement-3"]["reachable"])
 
+    def test_missing_destination_nodes_are_uncertain(self):
+        results = analyze_connectivity(
+            self.graph,
+            {"settlement-4": "A"},
+            ["MISSING"],
+        )
+
+        self.assertEqual(
+            results["settlement-4"]["isolation_status"],
+            "uncertain",
+        )
+        self.assertIsNone(results["settlement-4"]["reachable"])
+
 
 if __name__ == "__main__":
     unittest.main()
+ 
