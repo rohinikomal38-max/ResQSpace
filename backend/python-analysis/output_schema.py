@@ -8,9 +8,8 @@ VALID_PROCESSING_STATUSES = {
     "pending",
     "processing",
     "completed",
-    "completed_with_warnings",
+    "partial",
     "failed",
-    "not_assessed",
 }
 
 
