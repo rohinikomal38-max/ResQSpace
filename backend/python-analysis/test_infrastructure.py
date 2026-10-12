@@ -26,15 +26,22 @@ class TestInfrastructureExposure(unittest.TestCase):
 
         self.assertFalse(assess_exposure(asset, flood))
 
-    def test_missing_geometry_returns_none(self):
+    def test_missing_asset_geometry_returns_none(self):
         self.assertIsNone(assess_exposure(None, MockGeometry()))
 
-    def test_empty_geometry_returns_none(self):
-        asset = MockGeometry(empty=True)
-        flood = MockGeometry()
+    def test_missing_flood_geometry_returns_none(self):
+        self.assertIsNone(assess_exposure(MockGeometry(), None))
 
-        self.assertIsNone(assess_exposure(asset, flood))
+    def test_empty_asset_geometry_returns_none(self):
+        asset = MockGeometry(empty=True)
+        self.assertIsNone(assess_exposure(asset, MockGeometry()))
+
+    def test_empty_flood_geometry_returns_none(self):
+        flood = MockGeometry(empty=True)
+        self.assertIsNone(assess_exposure(MockGeometry(), flood))
 
 
 if __name__ == "__main__":
     unittest.main()
+
+
