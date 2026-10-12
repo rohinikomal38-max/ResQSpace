@@ -1,10 +1,42 @@
 
+import os
+import tempfile
+from pathlib import Path
+
 import geopandas as gpd
 import networkx as nx
 
 
+def write_geojson_atomically(dataframe, output_path):
+    """Write GeoJSON to a temporary file, then replace the destination."""
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    temp_path = None
+
+    try:
+        with tempfile.NamedTemporaryFile(
+            dir=path.parent,
+            prefix=f".{path.stem}.",
+            suffix=".geojson",
+            delete=False,
+        ) as temp_file:
+            temp_path = Path(temp_file.name)
+
+        dataframe.to_file(temp_path, driver="GeoJSON")
+        os.replace(temp_path, path)
+        temp_path = None
+    finally:
+        if temp_path is not None:
+            temp_path.unlink(missing_ok=True)
+
+
 def assess_road_closures(roads_path, flood_path, output_path):
-    """Flag road segments intersecting a flood extent as potential closures."""
+    """
+    Flag road segments intersecting potential-change areas.
+
+    These are potential closures, not verified road closures.
+    """
     roads = gpd.read_file(roads_path)
     flood = gpd.read_file(flood_path)
 
@@ -12,7 +44,9 @@ def assess_road_closures(roads_path, flood_path, output_path):
         raise ValueError("Both input files must have a defined CRS.")
 
     if roads.empty or flood.empty:
-        raise ValueError("Road and flood files must not be empty.")
+        raise ValueError(
+            "Road and potential-change files must not be empty."
+        )
 
     roads = roads.to_crs("EPSG:4326")
     flood = flood.to_crs("EPSG:4326")
@@ -35,7 +69,7 @@ def assess_road_closures(roads_path, flood_path, output_path):
     roads["closure_method"] = "strict_intersection"
     roads["closure_verified"] = False
 
-    roads.to_file(output_path, driver="GeoJSON")
+    write_geojson_atomically(roads, output_path)
 
     return {
         "total_road_segments": len(roads),
@@ -47,13 +81,23 @@ def assess_road_closures(roads_path, flood_path, output_path):
         ),
         "closure_method": "strict_intersection",
         "closure_verified": False,
-        "output_file": output_path,
+        "output_file": str(output_path),
         "crs": "EPSG:4326",
+        "classification_note": (
+            "Road intersections indicate potential closures only; "
+            "closures have not been independently verified."
+        ),
     }
 
 
 def analyze_connectivity(graph, settlement_nodes, destination_nodes):
-    """Assess settlement reachability on an already-prepared road graph."""
+    """
+    Assess reachability on an already-prepared road graph.
+
+    graph: NetworkX graph.
+    settlement_nodes: mapping of settlement IDs to graph node IDs.
+    destination_nodes: iterable of destination graph node IDs.
+    """
     results = {}
 
     available_destinations = [
@@ -91,4 +135,3 @@ def analyze_connectivity(graph, settlement_nodes, destination_nodes):
         }
 
     return results
-
