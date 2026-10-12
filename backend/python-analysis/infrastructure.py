@@ -1,3 +1,4 @@
+
 import geopandas as gpd
 
 
@@ -14,9 +15,10 @@ def assess_exposure(asset_geometry, flood_geometry):
 
 def process_asset_file(assets_path, flood_path, output_path):
     """
-    Assess infrastructure exposure against a flood extent.
+    Assess infrastructure overlap with potential flood-change areas.
 
     Input files must be readable GeoJSON files with valid CRS information.
+    The flood polygons represent potential changes, not confirmed flooding.
     Output is written as GeoJSON in EPSG:4326.
     """
     assets = gpd.read_file(assets_path)
@@ -26,7 +28,9 @@ def process_asset_file(assets_path, flood_path, output_path):
         raise ValueError("Both input files must have a defined CRS.")
 
     if assets.empty or flood.empty:
-        raise ValueError("Asset and flood files must not be empty.")
+        raise ValueError(
+            "Asset and potential-change files must not be empty."
+        )
 
     assets = assets.to_crs("EPSG:4326")
     flood = flood.to_crs("EPSG:4326")
@@ -38,9 +42,9 @@ def process_asset_file(assets_path, flood_path, output_path):
             "not_assessed"
             if geometry is None or geometry.is_empty
             else (
-                "exposed"
+                "potentially_affected"
                 if assess_exposure(geometry, flood_geometry)
-                else "not_exposed"
+                else "not_flagged"
             )
         )
     )
@@ -57,7 +61,9 @@ def process_asset_file(assets_path, flood_path, output_path):
                 projected_crs
             )
             projected_flood = flood.to_crs(projected_crs)
-            projected_flood_geometry = projected_flood.geometry.union_all()
+            projected_flood_geometry = (
+                projected_flood.geometry.union_all()
+            )
 
             fractions = []
 
@@ -87,4 +93,9 @@ def process_asset_file(assets_path, flood_path, output_path):
         "exposure_counts": counts,
         "output_file": output_path,
         "crs": "EPSG:4326",
+        "classification_note": (
+            "Potential affected status indicates geometric overlap "
+            "with potential-change areas. It does not confirm flooding "
+            "or infrastructure damage."
+        ),
     }
