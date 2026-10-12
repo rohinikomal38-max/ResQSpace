@@ -129,6 +129,49 @@ class TestConnectivity(unittest.TestCase):
                 results["settlement-1"]["reachable_destination_id"],
                 "C",
             )
+            
+    def test_file_integration_rejects_missing_destination_node(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            directory = Path(temp_dir)
+
+            graph_path = directory / "road_graph.json"
+            settlement_path = directory / "settlement_nodes.json"
+            destination_path = directory / "destination_nodes.json"
+
+            graph_path.write_text(
+                json.dumps({
+                    "nodes": [{"id": "A"}],
+                    "edges": [],
+                }),
+                encoding="utf-8",
+            )
+
+            settlement_path.write_text(
+                json.dumps({"settlement-1": "A"}),
+                encoding="utf-8",
+            )
+
+            destination_path.write_text(
+                json.dumps({
+                    "destinations": [
+                        {
+                            "id": "hospital-1",
+                            "node_id": "MISSING",
+                        }
+                    ]
+                }),
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(
+                ValueError,
+                "missing graph nodes",
+            ):
+                analyze_connectivity_from_files(
+                    graph_path,
+                    settlement_path,
+                    destination_path,
+                )
 
 
 if __name__ == "__main__":
