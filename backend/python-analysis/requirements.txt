@@ -1,1 +1,6 @@
 
+networkx
+geopandas
+shapely
+pyproj
+
