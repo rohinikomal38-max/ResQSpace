@@ -1,9 +1,37 @@
 
+import os
+import tempfile
+from pathlib import Path
+
 import geopandas as gpd
 
 
+def write_geojson_atomically(dataframe, output_path):
+    """Write GeoJSON to a temporary file, then replace the destination."""
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    temp_path = None
+
+    try:
+        with tempfile.NamedTemporaryFile(
+            dir=path.parent,
+            prefix=f".{path.stem}.",
+            suffix=".geojson",
+            delete=False,
+        ) as temp_file:
+            temp_path = Path(temp_file.name)
+
+        dataframe.to_file(temp_path, driver="GeoJSON")
+        os.replace(temp_path, path)
+        temp_path = None
+    finally:
+        if temp_path is not None:
+            temp_path.unlink(missing_ok=True)
+
+
 def assess_exposure(asset_geometry, flood_geometry):
-    """Return True, False, or None if exposure cannot be assessed."""
+    """Return True, False, or None if overlap cannot be assessed."""
     if asset_geometry is None or flood_geometry is None:
         return None
 
@@ -15,11 +43,10 @@ def assess_exposure(asset_geometry, flood_geometry):
 
 def process_asset_file(assets_path, flood_path, output_path):
     """
-    Assess infrastructure overlap with potential flood-change areas.
+    Assess infrastructure overlap with potential-change areas.
 
-    Input files must be readable GeoJSON files with valid CRS information.
-    The flood polygons represent potential changes, not confirmed flooding.
-    Output is written as GeoJSON in EPSG:4326.
+    Inputs must have readable geometries and defined CRS information.
+    Output is GeoJSON in EPSG:4326.
     """
     assets = gpd.read_file(assets_path)
     flood = gpd.read_file(flood_path)
@@ -37,21 +64,26 @@ def process_asset_file(assets_path, flood_path, output_path):
 
     flood_geometry = flood.geometry.union_all()
 
-    assets["exposure_status"] = assets.geometry.apply(
-        lambda geometry: (
-            "not_assessed"
-            if geometry is None or geometry.is_empty
-            else (
-                "potentially_affected"
-                if assess_exposure(geometry, flood_geometry)
-                else "not_flagged"
-            )
-        )
-    )
+    def classify_asset(geometry):
+        if geometry is None or geometry.is_empty:
+            return "not_assessed"
 
+        if not geometry.is_valid:
+            return "not_assessed"
+
+        if assess_exposure(geometry, flood_geometry):
+            return "potentially_affected"
+
+        return "not_flagged"
+
+    assets["exposure_status"] = assets.geometry.apply(classify_asset)
     assets["exposure_fraction"] = None
 
-    valid_assets = assets.geometry.notna() & ~assets.geometry.is_empty
+    valid_assets = (
+        assets.geometry.notna()
+        & ~assets.geometry.is_empty
+        & assets.geometry.is_valid
+    )
 
     if valid_assets.any():
         projected_crs = assets.estimate_utm_crs()
@@ -84,18 +116,17 @@ def process_asset_file(assets_path, flood_path, output_path):
 
             assets.loc[valid_assets, "exposure_fraction"] = fractions
 
-    assets.to_file(output_path, driver="GeoJSON")
+    write_geojson_atomically(assets, output_path)
 
     counts = assets["exposure_status"].value_counts().to_dict()
 
     return {
         "total_assets": len(assets),
         "exposure_counts": counts,
-        "output_file": output_path,
+        "output_file": str(output_path),
         "crs": "EPSG:4326",
         "classification_note": (
-            "Potential affected status indicates geometric overlap "
-            "with potential-change areas. It does not confirm flooding "
-            "or infrastructure damage."
+            "Potential geometric overlap with potential-change areas; "
+            "not confirmation of flooding or infrastructure damage."
         ),
     }
