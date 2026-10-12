@@ -22,19 +22,26 @@ def write_infrastructure_summary(
     event_id=None,
     source=None,
 ):
-    """Write infrastructure exposure statistics."""
+    """Write infrastructure potential-impact statistics."""
     summary = build_metadata(
         event_id=event_id,
         processing_status="completed",
         source=source,
         uncertainty_notes=[
-            "Exposure indicates geometric intersection, not confirmed damage."
+            "Potentially affected assets geometrically overlap "
+            "potential-change areas.",
+            "This overlap does not confirm flooding or infrastructure damage.",
+            "Results depend on input geometry quality and CRS information.",
         ],
     )
 
     summary.update({
         "total_assets": total_assets,
         "exposure_counts": exposure_counts,
+        "classification_note": (
+            "potentially_affected means geometric overlap with a "
+            "potential-change area; not_flagged does not confirm safety."
+        ),
     })
 
     write_json(output_path, summary)
@@ -61,6 +68,7 @@ def write_connectivity_summary(
         uncertainty_notes=[
             "Isolation is estimated using the supplied road graph.",
             "Results depend on road-closure and destination assumptions.",
+            "Potential isolation is not a confirmed real-world service disruption.",
         ],
     )
 
