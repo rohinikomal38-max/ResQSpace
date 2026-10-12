@@ -6,6 +6,13 @@ from pathlib import Path
 import geopandas as gpd
 import networkx as nx
 
+from graph_loader import (
+    load_destination_nodes,
+    load_road_graph,
+    load_settlement_nodes,
+    validate_node_mappings,
+)
+
 
 def write_geojson_atomically(dataframe, output_path):
     """Write GeoJSON to a temporary file, then replace the destination."""
@@ -135,3 +142,28 @@ def analyze_connectivity(graph, settlement_nodes, destination_nodes):
         }
 
     return results
+    
+def analyze_connectivity_from_files(
+    graph_path,
+    settlement_path,
+    destination_path,
+):
+    """Load validated connectivity inputs and analyze reachability."""
+    graph = load_road_graph(graph_path)
+    settlement_nodes = load_settlement_nodes(settlement_path)
+    destination_mapping = load_destination_nodes(destination_path)
+
+    validate_node_mappings(
+        graph,
+        settlement_nodes,
+        destination_mapping,
+    )
+
+    destination_node_ids = list(destination_mapping.values())
+
+    return analyze_connectivity(
+        graph,
+        settlement_nodes,
+        destination_node_ids,
+    )
+
