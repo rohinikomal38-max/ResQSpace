@@ -49,11 +49,12 @@ def detect_changes(
         relative_change = np.abs(post_data - pre_data) / denominator
         changed = valid & (relative_change >= threshold)
 
-        return {
+    return {
             "changed_pixel_count": int(np.count_nonzero(changed)),
             "valid_pixel_count": int(np.count_nonzero(valid)),
             "threshold": threshold,
             "method": "absolute_relative_change_baseline",
+            "changed_mask": changed,
             "warning": (
                 "Changed pixels are not confirmed flooded areas. "
                 "Validate with suitable Sentinel-1 processing and reference data."
