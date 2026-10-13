@@ -4,6 +4,14 @@ from pathlib import Path
 
 from output_schema import build_metadata
 from infrastructure import process_asset_file
+from connectivity import (
+    analyze_connectivity_from_files,
+    assess_road_closures,
+)
+from summary_outputs import (
+    write_connectivity_summary,
+    write_infrastructure_summary,
+)
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
