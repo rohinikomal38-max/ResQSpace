@@ -177,6 +177,25 @@ class TestGraphLoader(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "Duplicate edge"):
             load_road_graph(path)
+            
+    def test_exact_duplicate_edge_is_rejected(self):
+        path = self.write_json(
+            "road_graph.json",
+            {
+                "nodes": [
+                    {"id": "node-1"},
+                    {"id": "node-2"},
+                ],
+                "edges": [
+                    {"source": "node-1", "target": "node-2"},
+                    {"source": "node-1", "target": "node-2"},
+                ],
+            },
+        )
+
+        with self.assertRaisesRegex(ValueError, "Duplicate edge"):
+            load_road_graph(path)
+
 
 
 if __name__ == "__main__":
