@@ -34,8 +34,12 @@ def main():
         if not available
     ]
 
+       processing_status = (
+        "pending" if missing_inputs else "processing"
+    )
+
     result = build_metadata(
-        processing_status="pending",
+        processing_status=processing_status,
         uncertainty_notes=[
             "The complete analysis pipeline has not run yet.",
             (
