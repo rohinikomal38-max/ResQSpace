@@ -22,38 +22,56 @@ REQUIRED_INPUTS = {
 
 
 def main():
+    # Ensure the output directory exists.
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Check whether the required input files exist.
     available_inputs = {
         name: path.is_file()
         for name, path in REQUIRED_INPUTS.items()
     }
 
-      if missing_inputs:
+    missing_inputs = [
+        name
+        for name, available in available_inputs.items()
+        if not available
+    ]
+
+    # Determine the preflight status.
+    if missing_inputs:
         processing_status = "pending"
+        input_note = (
+            "Required input files are missing: "
+            + ", ".join(missing_inputs)
+        )
     else:
         processing_status = "processing"
-        
+        input_note = (
+            "All required input files are present; "
+            "their contents have not yet been validated."
+        )
+
+    # Build shared metadata.
     result = build_metadata(
         processing_status=processing_status,
         uncertainty_notes=[
             "The complete analysis pipeline has not run yet.",
-            (
-                "Required input files are missing: "
-                + ", ".join(missing_inputs)
-                if missing_inputs
-                else "All required input files are present; validity is not yet verified."
-            ),
+            input_note,
         ],
     )
 
-    print(json.dumps({
+    # Print a JSON report.
+    report = {
         "metadata": result,
         "paths": {
             "input_dir": str(INPUT_DIR),
             "output_dir": str(OUTPUT_DIR),
         },
         "available_inputs": available_inputs,
-    }, indent=2))
+        "missing_inputs": missing_inputs,
+    }
+
+    print(json.dumps(report, indent=2))
 
 
 if __name__ == "__main__":
