@@ -19,6 +19,7 @@ BACKEND_DIR = SCRIPT_DIR.parent
 DATA_DIR = BACKEND_DIR / "data"
 INPUT_DIR = DATA_DIR / "inputs"
 OUTPUT_DIR = DATA_DIR / "outputs"
+EVENT_ID = "resqspace-event"
 INFRASTRUCTURE_EXPOSURE_OUTPUT = (
     OUTPUT_DIR / "infrastructure_exposure.geojson"
 )
