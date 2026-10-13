@@ -34,7 +34,7 @@ def main():
         if not available
     ]
 
-       processing_status = (
+        processing_status = (
         "pending" if missing_inputs else "processing"
     )
 
