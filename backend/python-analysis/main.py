@@ -19,6 +19,18 @@ BACKEND_DIR = SCRIPT_DIR.parent
 DATA_DIR = BACKEND_DIR / "data"
 INPUT_DIR = DATA_DIR / "inputs"
 OUTPUT_DIR = DATA_DIR / "outputs"
+INFRASTRUCTURE_EXPOSURE_OUTPUT = (
+    OUTPUT_DIR / "infrastructure_exposure.geojson"
+)
+INFRASTRUCTURE_SUMMARY_OUTPUT = (
+    OUTPUT_DIR / "infrastructure_summary.json"
+)
+ROAD_CONNECTIVITY_OUTPUT = (
+    OUTPUT_DIR / "road_connectivity.geojson"
+)
+CONNECTIVITY_SUMMARY_OUTPUT = (
+    OUTPUT_DIR / "connectivity_summary.json"
+)
 
 REQUIRED_INPUTS = {
     "flood_extent": OUTPUT_DIR / "flood_extent.geojson",
