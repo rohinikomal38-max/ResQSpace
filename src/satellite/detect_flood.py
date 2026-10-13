@@ -29,7 +29,7 @@ def detect_changes(
     with rasterio.open(pre_event_path) as before, rasterio.open(
         post_event_path
     ) as after:
-        if before.count != 1:
+        if before.count != 1 or after.count != 1:
             raise ValueError("Detection requires single-band rasters")
 
         pre = before.read(1, masked=True).astype("float32")
@@ -45,18 +45,21 @@ def detect_changes(
         if not np.any(valid):
             raise ValueError("No valid overlapping pixels found")
 
-        denominator = np.maximum(np.abs(pre_data), 1e-6)
+        denominator = np.maximum(
+            (np.abs(pre_data) + np.abs(post_data)) / 2,
+            1e-6,
+        )
         relative_change = np.abs(post_data - pre_data) / denominator
         changed = valid & (relative_change >= threshold)
 
     return {
-            "changed_pixel_count": int(np.count_nonzero(changed)),
-            "valid_pixel_count": int(np.count_nonzero(valid)),
-            "threshold": threshold,
-            "method": "absolute_relative_change_baseline",
-            "changed_mask": changed,
-            "warning": (
-                "Changed pixels are not confirmed flooded areas. "
-                "Validate with suitable Sentinel-1 processing and reference data."
-            ),
-        }
+        "changed_pixel_count": int(np.count_nonzero(changed)),
+        "valid_pixel_count": int(np.count_nonzero(valid)),
+        "threshold": threshold,
+        "method": "symmetric_relative_change_baseline",
+        "changed_mask": changed,
+        "warning": (
+            "Changed pixels are not confirmed flooded areas. "
+            "Validate with suitable Sentinel-1 processing and reference data."
+        ),
+    }
