@@ -42,11 +42,12 @@ def write_infrastructure_summary(
     exposure_counts,
     event_id=None,
     source=None,
+    processing_status="completed",
 ):
     """Write infrastructure potential-impact statistics."""
     summary = build_metadata(
         event_id=event_id,
-        processing_status="completed",
+        processing_status=processing_status,
         source=source,
         uncertainty_notes=[
             "Potentially affected assets overlap potential-change areas.",
