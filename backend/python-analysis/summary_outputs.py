@@ -75,6 +75,7 @@ def write_connectivity_summary(
     destination_id=None,
     event_id=None,
     source=None,
+    processing_status="completed",
 ):
     """Write estimated settlement connectivity statistics."""
     statuses = [
@@ -84,7 +85,7 @@ def write_connectivity_summary(
 
     summary = build_metadata(
         event_id=event_id,
-        processing_status="completed",
+       processing_status=processing_status,
         source=source,
         uncertainty_notes=[
             "Connectivity is estimated using the supplied road graph.",
