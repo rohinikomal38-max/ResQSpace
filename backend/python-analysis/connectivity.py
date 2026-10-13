@@ -97,13 +97,13 @@ def assess_road_closures(roads_path, flood_path, output_path):
     }
 
 
+
 def analyze_connectivity(graph, settlement_nodes, destination_nodes):
     """
     Assess reachability on an already-prepared road graph.
 
-    graph: NetworkX graph.
-    settlement_nodes: mapping of settlement IDs to graph node IDs.
-    destination_nodes: iterable of destination graph node IDs.
+    Missing settlement nodes or unavailable destinations produce
+    uncertain results rather than unsupported isolation claims.
     """
     results = {}
 
@@ -112,11 +112,20 @@ def analyze_connectivity(graph, settlement_nodes, destination_nodes):
     ]
 
     for settlement_id, node in settlement_nodes.items():
-        if node not in graph or not available_destinations:
+        if node not in graph:
             results[settlement_id] = {
                 "reachable": None,
                 "isolation_status": "uncertain",
-                "reason": "Missing network node or destination",
+                "reason": "Settlement node is missing from the road graph",
+                "reachable_destination_id": None,
+            }
+            continue
+
+        if not available_destinations:
+            results[settlement_id] = {
+                "reachable": None,
+                "isolation_status": "uncertain",
+                "reason": "No valid destination nodes are available",
                 "reachable_destination_id": None,
             }
             continue
@@ -137,12 +146,16 @@ def analyze_connectivity(graph, settlement_nodes, destination_nodes):
                 if reachable_destination is not None
                 else "potentially_isolated"
             ),
-            "reason": None,
+            "reason": (
+                None
+                if reachable_destination is not None
+                else "No path to any available destination in the supplied graph"
+            ),
             "reachable_destination_id": reachable_destination,
         }
 
     return results
-    
+
 def analyze_connectivity_from_files(
     graph_path,
     settlement_path,
