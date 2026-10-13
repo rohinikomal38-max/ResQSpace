@@ -22,6 +22,7 @@ REQUIRED_INPUTS = {
 
 
 def main():
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     available_inputs = {
         name: path.is_file()
         for name, path in REQUIRED_INPUTS.items()
