@@ -58,6 +58,53 @@ class TestDetectChanges(unittest.TestCase):
 
         self.assertEqual(result["changed_pixel_count"], 0)
 
+    def test_handles_zero_change(self):
+        self.write_raster(
+            self.pre_path,
+            [[10, 10], [10, 10]],
+        )
+        self.write_raster(
+            self.post_path,
+            [[10, 10], [10, 10]],
+        )
+
+        result = detect_changes(
+            str(self.pre_path),
+            str(self.post_path),
+        )
+
+        self.assertEqual(result["changed_pixel_count"], 0)
+
+    def test_handles_near_zero_values(self):
+        self.write_raster(
+            self.pre_path,
+            [[0, 1e-8], [1e-7, 1e-6]],
+        )
+        self.write_raster(
+            self.post_path,
+            [[1e-8, 2e-8], [2e-7, 2e-6]],
+        )
+
+        result = detect_changes(
+            str(self.pre_path),
+            str(self.post_path),
+            threshold=0.15,
+        )
+
+        self.assertEqual(result["valid_pixel_count"], 4)
+        self.assertGreaterEqual(result["changed_pixel_count"], 0)
+        self.assertLessEqual(
+            result["changed_pixel_count"],
+            result["valid_pixel_count"],
+        )
+        self.assertEqual(
+            result["method"],
+            "symmetric_relative_change_baseline",
+        )
+
+
+
+
     def test_rejects_zero_threshold(self):
         self.write_raster(self.pre_path, [[10, 10], [10, 10]])
         self.write_raster(self.post_path, [[10, 10], [10, 10]])

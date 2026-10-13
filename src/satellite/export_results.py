@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import rasterio
 from rasterio.features import shapes
+from rasterio.warp import transform_geom
 from shapely.geometry import mapping
 
 
@@ -15,6 +16,7 @@ def export_change_results(
     output_dir: str,
     event_id: str,
     threshold: float,
+    method: str = "symmetric_relative_change_baseline",
 ) -> dict:
     """Export a change mask as GeoTIFF, GeoJSON, and a JSON summary."""
     if not event_id.strip():
@@ -49,7 +51,9 @@ def export_change_results(
                 features.append(
                     {
                         "type": "Feature",
-                        "geometry": geometry,
+                         "geometry": transform_geom(
+                            source.crs, "EPSG:4326", geometry
+                        ),
                         "properties": {
                             "event_id": event_id,
                             "classification": "potential_change",
@@ -78,7 +82,7 @@ def export_change_results(
             "event_id": event_id,
             "processing_status": "completed",
             "source": Path(reference_raster_path).name,
-            "method": "absolute_relative_change_baseline",
+            "method": method,
             "threshold": threshold,
             "valid_pixel_count": total_count,
             "changed_pixel_count": changed_count,
