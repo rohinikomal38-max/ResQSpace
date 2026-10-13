@@ -262,5 +262,18 @@ Required fields and rules:
   applied to the graph before reachability is calculated.
 - These input files have not yet been supplied. Full analysis and integration
   testing remain pending until representative datasets are available.
+  
+  ## Road-to-Graph Mapping
+
+Each road segment in `backend/data/inputs/road_segments.geojson` must have a unique `road_id` property.
+
+Each edge in `backend/data/inputs/road_graph.json` must include:
+- `source`: ID of the starting graph node
+- `target`: ID of the ending graph node
+- `road_id`: ID matching the corresponding road segment
+
+The `road_id` value must match between the GeoJSON feature and graph edge. Graph edges are undirected.
+
+Road segments flagged as `potential_closure` must not be treated as confirmed closures. Connectivity analysis must document whether potential closures were applied to the graph or whether the graph represents baseline connectivity.
 
 
