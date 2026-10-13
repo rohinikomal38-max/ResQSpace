@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 from output_schema import build_metadata
+from infrastructure import process_asset_file
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
