@@ -28,16 +28,11 @@ def main():
         for name, path in REQUIRED_INPUTS.items()
     }
 
-    missing_inputs = [
-        name
-        for name, available in available_inputs.items()
-        if not available
-    ]
-
-        processing_status = (
-        "pending" if missing_inputs else "processing"
-    )
-
+      if missing_inputs:
+        processing_status = "pending"
+    else:
+        processing_status = "processing"
+        
     result = build_metadata(
         processing_status=processing_status,
         uncertainty_notes=[
