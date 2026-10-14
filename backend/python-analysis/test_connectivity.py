@@ -94,6 +94,8 @@ class TestConnectivity(unittest.TestCase):
                         "target": "C",
                         "road_id": "road-BC",
                     },
+                    {"source": "A", "target": "B", "road_id": "road-1"},
+                    {"source": "B", "target": "C", "road_id": "road-2"},
                 ],
             }
 

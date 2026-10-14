@@ -39,6 +39,7 @@ class TestGraphLoader(unittest.TestCase):
                         "target": "node-2",
                         "road_id": "road-1",
                     }
+                    {"source": "node-1", "target": "node-2", "road_id": "road-1"}
                 ],
             },
         )
@@ -79,6 +80,7 @@ class TestGraphLoader(unittest.TestCase):
                         "target": "missing-node",
                         "road_id": "road-1",
                     }
+                    {"source": "node-1", "target": "missing-node", "road_id": "road-1"}
                 ],
             },
         )
@@ -97,6 +99,7 @@ class TestGraphLoader(unittest.TestCase):
                         "target": "node-1",
                         "road_id": "road-1",
                     }
+                    {"source": "node-1", "target": "node-1", "road_id": "road-1"}
                 ],
             },
         )
@@ -176,6 +179,7 @@ class TestGraphLoader(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Invalid JSON"):
             load_road_graph(path)
 
+
     def test_duplicate_edge_in_reverse_direction_is_rejected(self):
         path = self.write_json(
             "road_graph.json",
@@ -195,6 +199,8 @@ class TestGraphLoader(unittest.TestCase):
                         "target": "node-1",
                         "road_id": "road-1",
                     },
+                    {"source": "node-1", "target": "node-2", "road_id": "road-1"},
+                    {"source": "node-2", "target": "node-1", "road_id": "road-2"},
                 ],
             },
         )
@@ -221,6 +227,8 @@ class TestGraphLoader(unittest.TestCase):
                         "target": "node-2",
                         "road_id": "road-1",
                     },
+                    {"source": "node-1", "target": "node-2", "road_id": "road-1"},
+                    {"source": "node-1", "target": "node-2", "road_id": "road-2"},
                 ],
             },
         )

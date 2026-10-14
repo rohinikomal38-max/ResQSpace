@@ -1,0 +1,16 @@
+{
+  "schema_version": "0.1.0",
+  "event_id": "resqspace-flood-test",
+  "processing_status": "completed",
+  "source": "post_event_sigma0_roi.tif",
+  "method": "symmetric_relative_change_baseline",
+  "threshold": 0.15,
+  "valid_pixel_count": 1687090,
+  "changed_pixel_count": 1350090,
+  "change_fraction": 0.8002477639011553,
+  "classification_note": "Potential changes only; not confirmed flooded areas.",
+  "uncertainty_notes": [
+    "Results depend on raster quality and preprocessing.",
+    "The baseline has not been validated as a flood classifier."
+  ]
+}
