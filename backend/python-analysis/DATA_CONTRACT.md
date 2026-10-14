@@ -197,13 +197,9 @@ Required fields:
 - `edges[].target`: ID of an existing node.
 
 Rules:
-- Node IDs must be unique.
-- Every edge endpoint must reference an existing node.
-- Self-loops are not permitted in v0.1.0.
-- The graph is undirected.
-- Duplicate edges should be rejected or deduplicated during loading.
-- Optional road attributes, such as `road_id`, `road_type`, and `length_m`,
-  may be added later. They are not required by the current loader contract.
+- Every edge must include a non-empty `road_id` matching the corresponding road segment in `road_segments.geojson`.
+- `road_type` and `length_m` are optional attributes.
+- Road IDs must be unique in the road-segment GeoJSON and must map consistently to graph edges.
 
 ### 2. settlement_nodes.json
 
