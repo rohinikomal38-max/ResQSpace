@@ -69,9 +69,14 @@ def main():
         infra_result = process_asset_file(ASSETS, FLOOD, INFRA)
         closure_result = assess_road_closures(ROADS, FLOOD, ROAD_OUTPUT)
 
-        settlement_results = analyze_connectivity_from_files(
-            GRAPH, SETTLEMENTS, DESTINATIONS
-        )
+        
+settlement_results = analyze_connectivity_from_files(
+    GRAPH,
+    SETTLEMENTS,
+    DESTINATIONS,
+    ROAD_OUTPUT,
+)
+
 
         write_infrastructure_summary(
             INFRA_SUMMARY,
