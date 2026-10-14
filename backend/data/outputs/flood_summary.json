@@ -1,8 +1,11 @@
 {
   "schema_version": "0.1.0",
-  "event_id": "resqspace-flood-test",
+  "event_id": "resqspace-demo",
   "processing_status": "completed",
   "source": "post_event_sigma0_roi.tif",
+  "event_date": null,
+  "generated_at": "2026-10-14T16:08:27.982203+00:00",
+  "crs": "EPSG:4326",
   "method": "symmetric_relative_change_baseline",
   "threshold": 0.15,
   "valid_pixel_count": 1687090,

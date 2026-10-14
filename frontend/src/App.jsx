@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet'
+import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import './App.css'
 
@@ -29,10 +30,12 @@ function FitGeoJSON({ data }) {
   useEffect(() => {
     if (!data?.features?.length) return
 
-    const layer = GeoJSON.geometryToLayer(data)
-    const bounds = layer.getBounds?.()
+    const layer = L.geoJSON(data)
+    const bounds = layer.getBounds()
 
-    if (bounds?.isValid()) map.fitBounds(bounds, { padding: [24, 24] })
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [24, 24] })
+    }
   }, [data, map])
 
   return null

@@ -3,6 +3,10 @@ import cors from 'cors';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+
+const execFileAsync = promisify(execFile);
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -23,7 +27,8 @@ const VALID_STATUSES = [
 
 app.disable('x-powered-by');
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173',
+          'http://localhost:5175',],
 }));
 app.use(express.json({ limit: '1mb' }));
 
@@ -130,6 +135,70 @@ async function loadOutput(filename, validator) {
   };
 }
 
+
+let analysisRunning = false;
+
+app.post('/api/analysis/run', async (_req, res) => {
+  if (analysisRunning) {
+    return res.status(409).json({
+      status: 'processing',
+      message: 'Satellite analysis is already running.',
+    });
+  }
+
+  analysisRunning = true;
+
+  try {
+    const projectDir = path.resolve(__dirname, '..');
+    const python = process.env.PYTHON_EXECUTABLE ||
+      (process.platform === 'win32' ? 'python' : 'python3');
+
+    const preEvent = path.join(
+      projectDir, 'data', 'satellite_processed',
+      'pre_event_sigma0_roi.tif'
+    );
+    const postEvent = path.join(
+      projectDir, 'data', 'satellite_processed',
+      'post_event_sigma0_roi.tif'
+    );
+    const script = `
+import json
+import sys
+from src.satellite.run_pipeline import run_pipeline
+
+result = run_pipeline(
+    sys.argv[1],
+    sys.argv[2],
+    sys.argv[3],
+    sys.argv[4]
+)
+print(json.dumps(result))
+`;
+
+    const { stdout } = await execFileAsync(
+      python,
+      [
+        '-c', script, preEvent, postEvent,
+        DATA_DIR, 'resqspace-demo',
+      ],
+      { cwd: projectDir, maxBuffer: 2 * 1024 * 1024 }
+    );
+
+    return res.status(200).json({
+      status: 'completed',
+      result: JSON.parse(stdout.trim()),
+    });
+  } catch (error) {
+    console.error('Satellite analysis failed:', error.message);
+    return res.status(500).json({
+      status: 'failed',
+      error: 'Satellite analysis failed. Check Python dependencies and input rasters.',
+    });
+  } finally {
+    analysisRunning = false;
+  }
+});
+
 app.get('/api/results', async (_req, res) => {
   const definitions = {
     floodExtent: [
@@ -173,6 +242,20 @@ app.get('/api/results', async (_req, res) => {
     );
 
     const files = Object.fromEntries(entries);
+    if (files.floodExtent?.status === 'available') {
+  const geojson = files.floodExtent.data;
+  const maxFeatures = 500;
+
+  if (geojson.features.length > maxFeatures) {
+    files.floodExtent.data = {
+      ...geojson,
+      features: geojson.features.slice(0, maxFeatures),
+    };
+
+    files.floodExtent.message =
+      `Showing ${maxFeatures} of ${geojson.features.length} potential-change features for performance.`;
+  }
+}
     const results = Object.values(files);
 
     const availableCount = results.filter(
