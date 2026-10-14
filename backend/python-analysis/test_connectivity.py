@@ -84,8 +84,8 @@ class TestConnectivity(unittest.TestCase):
                     {"id": "C"},
                 ],
                 "edges": [
-                    {"source": "A", "target": "B"},
-                    {"source": "B", "target": "C"},
+                    {"source": "A", "target": "B", "road_id": "road-1"},
+                    {"source": "B", "target": "C", "road_id": "road-2"},
                 ],
             }
 
@@ -127,7 +127,7 @@ class TestConnectivity(unittest.TestCase):
             self.assertTrue(results["settlement-2"]["reachable"])
             self.assertEqual(
                 results["settlement-1"]["reachable_destination_id"],
-                "C",
+                "hospital-1",
             )
             
     def test_file_integration_rejects_missing_destination_node(self):
