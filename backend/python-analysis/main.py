@@ -45,11 +45,7 @@ CONNECTIVITY_SUMMARY = OUTPUT_DIR / "connectivity_summary.json"
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    available = [
-        name
-        for name, path in REQUIRED_INPUTS.items()
-        if path.is_file()
-    ]
+  available = list(REQUIRED_INPUTS.keys())
 
     missing = [
         name
