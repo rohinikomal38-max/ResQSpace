@@ -1,4 +1,3 @@
-
 import json
 from pathlib import Path
 
@@ -26,6 +25,14 @@ ROADS = INPUT_DIR / "road_segments.geojson"
 GRAPH = INPUT_DIR / "road_graph.json"
 SETTLEMENTS = INPUT_DIR / "settlement_nodes.json"
 DESTINATIONS = INPUT_DIR / "destination_nodes.json"
+REQUIRED_INPUTS = {
+    "flood_extent": FLOOD,
+    "infrastructure_assets": ASSETS,
+    "road_segments": ROADS,
+    "road_graph": GRAPH,
+    "settlement_nodes": SETTLEMENTS,
+    "destination_nodes": DESTINATIONS,
+}
 
 INFRA = OUTPUT_DIR / "infrastructure_exposure.geojson"
 INFRA_SUMMARY = OUTPUT_DIR / "infrastructure_summary.json"
@@ -36,14 +43,8 @@ CONNECTIVITY_SUMMARY = OUTPUT_DIR / "connectivity_summary.json"
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    required = {
-        "flood_extent": FLOOD,
-        "infrastructure_assets": ASSETS,
-        "road_segments": ROADS,
-        "road_graph": GRAPH,
-        "settlement_nodes": SETTLEMENTS,
-        "destination_nodes": DESTINATIONS,
-    }
+    required = REQUIRED_INPUTS
+
     missing = [
         name for name, path in required.items()
         if not path.is_file()
@@ -59,8 +60,17 @@ def main():
                 "Potential flood changes and road closures are not confirmed.",
             ],
         )
+        available_inputs = [
+    name for name, path in REQUIRED_INPUTS.items()
+    if path.is_file()
+]
         print(json.dumps({
             "metadata": metadata,
+            "paths": {
+                "input_dir": str(INPUT_DIR),
+                "output_dir": str(OUTPUT_DIR),
+            },
+            "available_inputs": available_inputs,
             "missing_inputs": missing,
         }, indent=2))
         return
@@ -69,14 +79,12 @@ def main():
         infra_result = process_asset_file(ASSETS, FLOOD, INFRA)
         closure_result = assess_road_closures(ROADS, FLOOD, ROAD_OUTPUT)
 
-        
-settlement_results = analyze_connectivity_from_files(
-    GRAPH,
-    SETTLEMENTS,
-    DESTINATIONS,
-    ROAD_OUTPUT,
-)
-
+        settlement_results = analyze_connectivity_from_files(
+            GRAPH,
+            SETTLEMENTS,
+            DESTINATIONS,
+            ROAD_OUTPUT,
+        )
 
         write_infrastructure_summary(
             INFRA_SUMMARY,
@@ -118,7 +126,6 @@ settlement_results = analyze_connectivity_from_files(
                 str(CONNECTIVITY_SUMMARY),
             ],
         }, indent=2))
-
     except Exception as exc:
         print(json.dumps({
             "metadata": build_metadata(

@@ -30,8 +30,12 @@ class TestMain(unittest.TestCase):
 
         self.assertIn("input_dir", data["paths"])
         self.assertIn("output_dir", data["paths"])
-        self.assertIn("flood_extent", data["available_inputs"])
-
-
+        self.assertIn("flood_extent", data["missing_inputs"])
+        self.assertNotIn("flood_extent", data["available_inputs"])
+        self.assertTrue(
+            set(data["available_inputs"]).isdisjoint(
+                data["missing_inputs"]
+            )
+        )
 if __name__ == "__main__":
     unittest.main()
