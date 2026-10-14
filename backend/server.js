@@ -27,7 +27,8 @@ const VALID_STATUSES = [
 
 app.disable('x-powered-by');
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173',
+          'http://localhost:5175',],
 }));
 app.use(express.json({ limit: '1mb' }));
 
@@ -241,6 +242,20 @@ app.get('/api/results', async (_req, res) => {
     );
 
     const files = Object.fromEntries(entries);
+    if (files.floodExtent?.status === 'available') {
+  const geojson = files.floodExtent.data;
+  const maxFeatures = 500;
+
+  if (geojson.features.length > maxFeatures) {
+    files.floodExtent.data = {
+      ...geojson,
+      features: geojson.features.slice(0, maxFeatures),
+    };
+
+    files.floodExtent.message =
+      `Showing ${maxFeatures} of ${geojson.features.length} potential-change features for performance.`;
+  }
+}
     const results = Object.values(files);
 
     const availableCount = results.filter(
