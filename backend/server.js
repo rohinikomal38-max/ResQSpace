@@ -25,12 +25,18 @@ const VALID_STATUSES = [
   'failed',
 ];
 
+
 app.disable('x-powered-by');
+
 app.use(cors({
-  origin: ['http://localhost:5173',
-          'http://localhost:5175',],
-          'https://res-q-space-6wjv9nmkc-nityajha54-6094s-projects.vercel.app'
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5175',
+    'https://res-q-space-6wjv9nmkc-nityajha54-6094s-projects.vercel.app',
+    'https://res-q-space-git-main-nityajha54-6094s-projects.vercel.app',
+  ],
 }));
+
 app.use(express.json({ limit: '1mb' }));
 
 app.get('/api/health', (_req, res) => {
