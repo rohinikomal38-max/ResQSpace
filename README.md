@@ -29,7 +29,7 @@ Turning satellite-derived flood information into actionable geospatial insights 
 # ResQSpace
 
 ## 🌐 Live Demo
-**Live Website:** https://res-q-space-7l7w5jg59-nityajha54-6094s-projects.vercel.app/
+**Live Website:** https://res-q-space-git-main-nityajha54-6094s-projects.vercel.app/
 
 ## About the Project
 ...
