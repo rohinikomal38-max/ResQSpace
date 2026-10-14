@@ -1,6 +1,7 @@
 """Export baseline change-detection results for ResQSpace."""
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -17,6 +18,7 @@ def export_change_results(
     event_id: str,
     threshold: float,
     method: str = "symmetric_relative_change_baseline",
+    valid_pixel_count: int | None = None,
 ) -> dict:
     """Export a change mask as GeoTIFF, GeoJSON, and a JSON summary."""
     if not event_id.strip():
@@ -73,20 +75,34 @@ def export_change_results(
             ),
             encoding="utf-8",
         )
-
         changed_count = int(np.count_nonzero(mask))
-        total_count = int(mask.size)
+        total_count = (
+            int(valid_pixel_count)
+            if valid_pixel_count is not None
+            else int(mask.size)
+        )
+
+        if total_count < changed_count or total_count > mask.size:
+            raise ValueError(
+                "valid_pixel_count must be between changed pixels "
+                "and total mask pixels"
+            )
 
         summary = {
             "schema_version": "0.1.0",
             "event_id": event_id,
             "processing_status": "completed",
             "source": Path(reference_raster_path).name,
+            "event_date": None,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "crs": "EPSG:4326",
             "method": method,
             "threshold": threshold,
             "valid_pixel_count": total_count,
             "changed_pixel_count": changed_count,
-            "change_fraction": changed_count / total_count if total_count else None,
+            "change_fraction": (
+                changed_count / total_count if total_count else None
+            ),
             "classification_note": (
                 "Potential changes only; not confirmed flooded areas."
             ),
@@ -95,6 +111,7 @@ def export_change_results(
                 "The baseline has not been validated as a flood classifier.",
             ],
         }
+
 
         summary_path = output / "flood_summary.json"
         summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
