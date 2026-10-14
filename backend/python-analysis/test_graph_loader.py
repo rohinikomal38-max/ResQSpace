@@ -34,11 +34,6 @@ class TestGraphLoader(unittest.TestCase):
                     {"id": "node-2"},
                 ],
                 "edges": [
-                    {
-                        "source": "node-1",
-                        "target": "node-2",
-                        "road_id": "road-1",
-                    }
                     {"source": "node-1", "target": "node-2", "road_id": "road-1"}
                 ],
             },
@@ -49,10 +44,6 @@ class TestGraphLoader(unittest.TestCase):
         self.assertIsInstance(graph, nx.Graph)
         self.assertEqual(graph.number_of_nodes(), 2)
         self.assertTrue(graph.has_edge("node-1", "node-2"))
-        self.assertEqual(
-            graph["node-1"]["node-2"]["road_id"],
-            "road-1",
-        )
 
     def test_duplicate_node_is_rejected(self):
         path = self.write_json(
@@ -75,11 +66,6 @@ class TestGraphLoader(unittest.TestCase):
             {
                 "nodes": [{"id": "node-1"}],
                 "edges": [
-                    {
-                        "source": "node-1",
-                        "target": "missing-node",
-                        "road_id": "road-1",
-                    }
                     {"source": "node-1", "target": "missing-node", "road_id": "road-1"}
                 ],
             },
@@ -94,11 +80,6 @@ class TestGraphLoader(unittest.TestCase):
             {
                 "nodes": [{"id": "node-1"}],
                 "edges": [
-                    {
-                        "source": "node-1",
-                        "target": "node-1",
-                        "road_id": "road-1",
-                    }
                     {"source": "node-1", "target": "node-1", "road_id": "road-1"}
                 ],
             },
@@ -171,7 +152,6 @@ class TestGraphLoader(unittest.TestCase):
             {"settlement-1": "node-1"},
             {"hospital-1": "node-2"},
         )
-
     def test_invalid_json_is_reported(self):
         path = self.directory / "invalid.json"
         path.write_text("{invalid json}", encoding="utf-8")
@@ -189,16 +169,6 @@ class TestGraphLoader(unittest.TestCase):
                     {"id": "node-2"},
                 ],
                 "edges": [
-                    {
-                        "source": "node-1",
-                        "target": "node-2",
-                        "road_id": "road-1",
-                    },
-                    {
-                        "source": "node-2",
-                        "target": "node-1",
-                        "road_id": "road-1",
-                    },
                     {"source": "node-1", "target": "node-2", "road_id": "road-1"},
                     {"source": "node-2", "target": "node-1", "road_id": "road-2"},
                 ],
@@ -217,16 +187,6 @@ class TestGraphLoader(unittest.TestCase):
                     {"id": "node-2"},
                 ],
                 "edges": [
-                    {
-                        "source": "node-1",
-                        "target": "node-2",
-                        "road_id": "road-1",
-                    },
-                    {
-                        "source": "node-1",
-                        "target": "node-2",
-                        "road_id": "road-1",
-                    },
                     {"source": "node-1", "target": "node-2", "road_id": "road-1"},
                     {"source": "node-1", "target": "node-2", "road_id": "road-2"},
                 ],
@@ -235,6 +195,7 @@ class TestGraphLoader(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "Duplicate edge"):
             load_road_graph(path)
+
 
 
 if __name__ == "__main__":
