@@ -96,7 +96,7 @@ def load_road_graph(path):
             )
 
         seen_edges.add(edge_key)
-        graph.add_edge(source, target)
+        graph.add_edge(source, target, road_id=road_id)
 
     return graph
 
