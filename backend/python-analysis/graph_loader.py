@@ -74,10 +74,19 @@ def load_road_graph(path):
                 f"Edge references a missing node: {source} -> {target}"
             )
 
+        
+        road_id = edge.get("road_id")
+
+        if not isinstance(road_id, str) or not road_id.strip():
+            raise ValueError(
+                "Every edge needs a non-empty string road_id."
+            )
+
         if source == target:
             raise ValueError(
                 f"Self-loops are not permitted: {source}"
             )
+
 
         edge_key = frozenset((source, target))
 
