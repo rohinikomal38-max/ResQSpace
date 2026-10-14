@@ -34,6 +34,15 @@ REQUIRED_INPUTS = {
     "destination_nodes": DESTINATIONS,
 }
 
+REQUIRED_INPUTS = {
+    "flood_extent": FLOOD,
+    "infrastructure_assets": ASSETS,
+    "road_segments": ROADS,
+    "road_graph": GRAPH,
+    "settlement_nodes": SETTLEMENTS,
+    "destination_nodes": DESTINATIONS,
+}
+
 INFRA = OUTPUT_DIR / "infrastructure_exposure.geojson"
 INFRA_SUMMARY = OUTPUT_DIR / "infrastructure_summary.json"
 ROAD_OUTPUT = OUTPUT_DIR / "road_connectivity.geojson"
@@ -43,10 +52,16 @@ CONNECTIVITY_SUMMARY = OUTPUT_DIR / "connectivity_summary.json"
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+    available = [
+    name for name, path in REQUIRED_INPUTS.items()
+    if path.is_file()
+]
+    
     required = REQUIRED_INPUTS
 
     missing = [
-        name for name, path in required.items()
+        name
+        for name, path in REQUIRED_INPUTS.items()
         if not path.is_file()
     ]
 
@@ -60,6 +75,7 @@ def main():
                 "Potential flood changes and road closures are not confirmed.",
             ],
         )
+
         available_inputs = [
     name for name, path in REQUIRED_INPUTS.items()
     if path.is_file()
@@ -72,10 +88,26 @@ def main():
             },
             "available_inputs": available_inputs,
             "missing_inputs": missing,
+            "available_inputs": available,
+            "paths": {
+                "input_dir": str(INPUT_DIR),
+                "output_dir": str(OUTPUT_DIR),
+            },
         }, indent=2))
         return
 
     try:
+        infra_result = process_asset_file(
+            ASSETS,
+            FLOOD,
+            INFRA,
+        )
+
+        closure_result = assess_road_closures(
+            ROADS,
+            FLOOD,
+            ROAD_OUTPUT,
+        )
         infra_result = process_asset_file(ASSETS, FLOOD, INFRA)
         closure_result = assess_road_closures(ROADS, FLOOD, ROAD_OUTPUT)
 
