@@ -1,0 +1,8 @@
+{
+  "destinations": [
+    {
+      "id": "destination_example",
+      "node_id": "node_example"
+    }
+  ]
+}

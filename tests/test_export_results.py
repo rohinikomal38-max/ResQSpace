@@ -76,6 +76,33 @@ class TestExportChangeResults(unittest.TestCase):
             "potential_change",
         )
 
+    def test_summary_includes_contract_metadata_and_valid_count(self):
+        mask = np.array([[True, False], [False, False]])
+
+        result = export_change_results(
+            str(self.reference_path),
+            mask,
+            str(self.output_dir),
+            "metadata-test-event",
+            0.15,
+            valid_pixel_count=3,
+        )
+
+        with open(result["summary"], encoding="utf-8") as file:
+            summary = json.load(file)
+
+        self.assertEqual(summary["schema_version"], "0.1.0")
+        self.assertEqual(summary["event_id"], "metadata-test-event")
+        self.assertEqual(summary["processing_status"], "completed")
+        self.assertEqual(summary["valid_pixel_count"], 3)
+        self.assertEqual(summary["changed_pixel_count"], 1)
+        self.assertAlmostEqual(summary["change_fraction"], 1 / 3)
+        self.assertEqual(summary["crs"], "EPSG:4326")
+        self.assertIsNone(summary["event_date"])
+        self.assertTrue(summary["generated_at"])
+        self.assertIsInstance(summary["uncertainty_notes"], list)
+
+
     def test_rejects_wrong_mask_dimensions(self):
         with self.assertRaises(ValueError):
             export_change_results(
