@@ -65,17 +65,25 @@ def main():
         }, indent=2))
         return
 
-    try:
-        infra_result = process_asset_file(ASSETS, FLOOD, INFRA)
-        closure_result = assess_road_closures(ROADS, FLOOD, ROAD_OUTPUT)
+      try:
+        infra_result = process_asset_file(
+            ASSETS,
+            FLOOD,
+            INFRA,
+        )
 
-        
-settlement_results = analyze_connectivity_from_files(
-    GRAPH,
-    SETTLEMENTS,
-    DESTINATIONS,
-    ROAD_OUTPUT,
-)
+        closure_result = assess_road_closures(
+            ROADS,
+            FLOOD,
+            ROAD_OUTPUT,
+        )
+
+        settlement_results = analyze_connectivity_from_files(
+            GRAPH,
+            SETTLEMENTS,
+            DESTINATIONS,
+            ROAD_OUTPUT,
+        )
 
 
         write_infrastructure_summary(
