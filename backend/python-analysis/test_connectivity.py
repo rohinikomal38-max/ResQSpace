@@ -84,8 +84,16 @@ class TestConnectivity(unittest.TestCase):
                     {"id": "C"},
                 ],
                 "edges": [
-                    {"source": "A", "target": "B"},
-                    {"source": "B", "target": "C"},
+                    {
+                        "source": "A",
+                        "target": "B",
+                        "road_id": "road-AB",
+                    },
+                    {
+                        "source": "B",
+                        "target": "C",
+                        "road_id": "road-BC",
+                    },
                 ],
             }
 
@@ -127,9 +135,9 @@ class TestConnectivity(unittest.TestCase):
             self.assertTrue(results["settlement-2"]["reachable"])
             self.assertEqual(
                 results["settlement-1"]["reachable_destination_id"],
-                "C",
+                "hospital-1",
             )
-            
+
     def test_file_integration_rejects_missing_destination_node(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             directory = Path(temp_dir)
@@ -172,7 +180,7 @@ class TestConnectivity(unittest.TestCase):
                     settlement_path,
                     destination_path,
                 )
-                
+
     def test_file_integration_with_no_destinations_is_uncertain(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             directory = Path(temp_dir)
@@ -212,7 +220,6 @@ class TestConnectivity(unittest.TestCase):
             self.assertIsNone(
                 results["settlement-1"]["reachable"]
             )
-
 
     def test_file_integration_rejects_missing_settlement_node(self):
         with tempfile.TemporaryDirectory() as temp_dir:
