@@ -5,7 +5,9 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import './App.css'
 
-const API_URL = 'http://localhost:3000/api/results'
+
+const API_URL = 'https://resqspace.onrender.com/api/results'
+
 
 function StatusBadge({ status }) {
   const labels = {
