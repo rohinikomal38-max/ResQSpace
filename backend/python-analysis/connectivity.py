@@ -219,10 +219,25 @@ def analyze_connectivity_from_files(
         ]
         graph.remove_edges_from(edges_to_remove)
 
-    return analyze_connectivity(
+   
+    results = analyze_connectivity(
         graph,
         settlement_nodes,
         list(destination_mapping.values()),
     )
+
+    node_to_destination = {}
+    for destination_id, node_id in destination_mapping.items():
+        node_to_destination.setdefault(node_id, destination_id)
+
+    for result in results.values():
+        node_id = result["reachable_destination_id"]
+        if node_id is not None:
+            result["reachable_destination_id"] = (
+                node_to_destination.get(node_id)
+            )
+
+    return results
+
 
 
