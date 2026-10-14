@@ -26,6 +26,7 @@ const VALID_STATUSES = [
 ];
 
 
+
 app.disable('x-powered-by');
 
 app.use(cors({
@@ -34,8 +35,10 @@ app.use(cors({
     'http://localhost:5175',
     'https://res-q-space-6wjv9nmkc-nityajha54-6094s-projects.vercel.app',
     'https://res-q-space-git-main-nityajha54-6094s-projects.vercel.app',
+    'https://res-q-space-nvo94to3d-nityajha54-6094s-projects.vercel.app',
   ],
 }));
+
 
 app.use(express.json({ limit: '1mb' }));
 
