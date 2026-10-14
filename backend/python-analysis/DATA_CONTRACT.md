@@ -174,7 +174,7 @@ Proposed directory:
 
 Required structure:
 
-```json
+
 {
   "nodes": [
     {"id": "node-1"},
@@ -182,11 +182,19 @@ Required structure:
     {"id": "node-3"}
   ],
   "edges": [
-    {"source": "node-1", "target": "node-2"},
-    {"source": "node-2", "target": "node-3"}
+    {
+      "source": "node-1",
+      "target": "node-2",
+      "road_id": "road-1"
+    },
+    {
+      "source": "node-2",
+      "target": "node-3",
+      "road_id": "road-2"
+    }
   ]
 }
-```
+
 
 Required fields:
 
