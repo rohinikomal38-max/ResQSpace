@@ -51,6 +51,7 @@ def run_pipeline(
         event_id=event_id,
         threshold=threshold,
         method=detection["method"],
+        valid_pixel_count=detection["valid_pixel_count"],
     )
 
 
