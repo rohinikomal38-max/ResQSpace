@@ -156,12 +156,16 @@ def analyze_connectivity(graph, settlement_nodes, destination_nodes):
 
     return results
 
+
 def analyze_connectivity_from_files(
     graph_path,
     settlement_path,
     destination_path,
+    road_closures_path=None,
 ):
-    """Load validated connectivity inputs and analyze reachability."""
+    """Analyze baseline or potential post-closure connectivity."""
+    import geopandas as gpd
+
     graph = load_road_graph(graph_path)
     settlement_nodes = load_settlement_nodes(settlement_path)
     destination_mapping = load_destination_nodes(destination_path)
@@ -172,11 +176,53 @@ def analyze_connectivity_from_files(
         destination_mapping,
     )
 
-    destination_node_ids = list(destination_mapping.values())
+    if road_closures_path is not None:
+        closures_path = Path(road_closures_path)
+
+        if not closures_path.is_file():
+            raise FileNotFoundError(
+                f"Road closure output unavailable: {closures_path}"
+            )
+
+        roads = gpd.read_file(closures_path)
+
+        required_columns = {"road_id", "closure_status"}
+        if not required_columns.issubset(roads.columns):
+            raise ValueError(
+                "Road closure output must contain road_id and "
+                "closure_status columns."
+            )
+
+        potential_closures = set(
+            roads.loc[
+                roads["closure_status"] == "potential_closure",
+                "road_id",
+            ].dropna().astype(str)
+        )
+
+        graph_road_ids = {
+            str(data.get("road_id"))
+            for _, _, data in graph.edges(data=True)
+        }
+
+        unmatched = potential_closures - graph_road_ids
+        if unmatched:
+            raise ValueError(
+                "Potential closure road IDs do not match graph edges: "
+                + ", ".join(sorted(unmatched))
+            )
+
+        edges_to_remove = [
+            (source, target)
+            for source, target, data in graph.edges(data=True)
+            if str(data.get("road_id")) in potential_closures
+        ]
+        graph.remove_edges_from(edges_to_remove)
 
     return analyze_connectivity(
         graph,
         settlement_nodes,
-        destination_node_ids,
+        list(destination_mapping.values()),
     )
+
 
