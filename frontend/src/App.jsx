@@ -9,6 +9,152 @@ import './App.css'
 const API_URL = 'https://resqspace.onrender.com/api/results'
 
 
+function LandingPage({ onLaunch }) {
+return ( <div className="landing-page"> <nav className="landing-nav"> <div className="landing-brand"> <span className="landing-brand-mark">R</span> <span>
+ResQ<span className="landing-brand-light">Space</span> </span> </div> <span className="landing-nav-label">DISASTER INTELLIGENCE PLATFORM</span> </nav>
+
+  <section className="landing-hero">
+    <div className="landing-hero-content">
+      <p className="landing-eyebrow">
+        SATELLITE-POWERED DISASTER INTELLIGENCE
+      </p>
+
+      <h1>
+        When floods strike,
+        <br />
+        <span>every second matters.</span>
+      </h1>
+
+      <p className="landing-description">
+        ResQ Space transforms geospatial flood data into interactive
+        visual insights to help emergency responders understand
+        potentially affected areas and support disaster-response planning.
+      </p>
+
+      <div className="landing-actions">
+        <button
+          className="landing-button landing-button-primary"
+          onClick={onLaunch}
+        >
+          Launch Dashboard &rarr;
+        </button>
+
+        <a
+          className="landing-button landing-button-secondary"
+          href="#how-it-works"
+        >
+          Discover How It Works
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section className="landing-section">
+    <div className="landing-section-heading">
+      <p className="landing-eyebrow">BUILT FOR DISASTER RESPONSE</p>
+      <h2>From geospatial data to actionable insights.</h2>
+      <p>
+        Explore potential flood impacts through a unified geospatial
+        analysis workspace.
+      </p>
+    </div>
+
+    <div className="landing-features">
+      <article className="landing-feature-card">
+        <div className="landing-feature-icon">🛰️</div>
+        <h3>Flood Mapping</h3>
+        <p>
+          Visualize available flood-extent data on an interactive map
+          to understand potentially affected geographic areas.
+        </p>
+      </article>
+
+      <article className="landing-feature-card">
+        <div className="landing-feature-icon">🏗️</div>
+        <h3>Infrastructure Exposure</h3>
+        <p>
+          Organize infrastructure-exposure analysis outputs to support
+          assessment of potentially affected assets.
+        </p>
+      </article>
+
+      <article className="landing-feature-card">
+        <div className="landing-feature-icon">🛣️</div>
+        <h3>Connectivity Insights</h3>
+        <p>
+          Present available road-connectivity analysis outputs to help
+          assess possible access disruptions.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section className="landing-section" id="how-it-works">
+    <div className="landing-section-heading">
+      <p className="landing-eyebrow">HOW IT WORKS</p>
+      <h2>A clearer picture of flood impact.</h2>
+      <p>
+        ResQ Space brings geospatial processing and interactive
+        visualization together in one workspace.
+      </p>
+    </div>
+
+    <div className="landing-process">
+      <article className="landing-process-step">
+        <span className="landing-step-number">01</span>
+        <h3>Geospatial Data</h3>
+        <p>Start with available satellite-derived and geographic inputs.</p>
+      </article>
+
+      <article className="landing-process-step">
+        <span className="landing-step-number">02</span>
+        <h3>Flood Analysis</h3>
+        <p>Process available inputs into geospatial analysis outputs.</p>
+      </article>
+
+      <article className="landing-process-step">
+        <span className="landing-step-number">03</span>
+        <h3>Visualize Results</h3>
+        <p>Present available geographic results and summary metrics.</p>
+      </article>
+
+      <article className="landing-process-step">
+        <span className="landing-step-number">04</span>
+        <h3>Explore Insights</h3>
+        <p>Review output availability and potential impacts in the dashboard.</p>
+      </article>
+    </div>
+  </section>
+
+  <section className="landing-cta">
+    <h2>Explore the map. Understand the impact.</h2>
+    <p>
+      Open the ResQ Space workspace to explore available flood data,
+      analysis summaries, and geospatial outputs.
+    </p>
+
+    <button
+      className="landing-button landing-button-primary"
+      onClick={onLaunch}
+    >
+      Explore ResQ Space &rarr;
+    </button>
+  </section>
+
+  <footer className="landing-footer">
+    <div>ResQ Space · Mapping potential flood impacts from space</div>
+    <div>
+      Analysis outputs support assessment and are not confirmation of
+      ground-truth damage or road closures.
+    </div>
+  </footer>
+</div>
+
+
+)
+}
+
+
 function StatusBadge({ status }) {
   const labels = {
     available: 'Available',
@@ -126,6 +272,7 @@ function OutputRow({ label, file }) {
 }
 
 export default function App() {
+  const [showDashboard, setShowDashboard] = useState(false)
   const [results, setResults] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -205,7 +352,11 @@ export default function App() {
     connectivitySummary?.isolated_count ??
     null
 
-  return (
+  if (!showDashboard) {
+  return <LandingPage onLaunch={() => setShowDashboard(true)} />
+}
+
+return (
     <main className="app-shell">
       <aside className="sidebar">
         <a className="brand" href="#overview">
