@@ -386,15 +386,14 @@ ResQ Space is a collaborative hackathon project.
 
 The work brings together satellite processing, geospatial analysis, backend integration, and frontend visualisation.
 
-Team members and their contributions should be credited here:
+
 
 | Team member          | Contribution                                 |
 | -------------------- | -------------------------------------------- |
-| Add team member name | Satellite processing and geospatial analysis |
-| Add team member name | Backend API and integration                  |
-| Add team member name | Frontend dashboard and mapping               |
+| Rohini Komal         | Satellite processing and geospatial analysis |
+| Lucky                | Backend API and integration, frontend dashboard mapping|
+| Rachna Garg          |Road Connectivity Analysis & Python Testing|
 
-*Update the names and responsibilities to reflect your actual team before submission.*
 
 ---
 
@@ -410,6 +409,6 @@ ResQ Space aims to bridge the gap between **observing a potential disaster and u
 
 ---
 
-## 📄 License
 
-No license has been specified here. Add a license file and update this section once the team has agreed on the terms under which the project may be used and distributed.
+
+
